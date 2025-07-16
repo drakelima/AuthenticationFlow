@@ -1,0 +1,209 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(20, 14.3%, 4.1%);
+  --muted: hsl(60, 4.8%, 95.9%);
+  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(20, 14.3%, 4.1%);
+  --border: hsl(20, 5.9%, 90%);
+  --input: hsl(20, 5.9%, 90%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(60, 4.8%, 95.9%);
+  --secondary-foreground: hsl(24, 9.8%, 10%);
+  --accent: hsl(60, 4.8%, 95.9%);
+  --accent-foreground: hsl(24, 9.8%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(20, 14.3%, 4.1%);
+  --radius: 0.5rem;
+
+  /* Custom Material Design colors */
+  --primary-material: hsl(207, 90%, 54%);
+  --primary-dark: hsl(207, 86%, 45%);
+  --primary-light: hsl(207, 90%, 70%);
+  --secondary-material: hsl(0, 0%, 26%);
+  --secondary-light: hsl(0, 0%, 42%);
+  --surface: hsl(0, 0%, 100%);
+  --background-material: hsl(0, 0%, 96%);
+  --error: hsl(0, 65%, 51%);
+  --success: hsl(122, 39%, 49%);
+  --on-surface: hsl(0, 0%, 13%);
+  --on-surface-variant: hsl(0, 0%, 46%);
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  .material-shadow {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 8px 16px rgba(0,0,0,0.1);
+  }
+
+  .material-shadow-elevated {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.12), 0 16px 32px rgba(0,0,0,0.12);
+  }
+
+  .btn-primary {
+    background: linear-gradient(45deg, var(--primary-material), var(--primary-light));
+    transition: all 0.2s ease;
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(45deg, var(--primary-dark), var(--primary-material));
+    transform: translateY(-1px);
+  }
+
+  .floating-input {
+    position: relative;
+  }
+
+  .floating-input label {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    transition: all 0.2s ease;
+    color: var(--on-surface-variant);
+    pointer-events: none;
+    background: var(--surface);
+    padding: 0 4px;
+    font-size: 14px;
+  }
+
+  .floating-input input:focus + label,
+  .floating-input input:not(:placeholder-shown) + label {
+    top: 0;
+    font-size: 12px;
+    color: var(--primary-material);
+  }
+
+  .floating-input input {
+    transition: all 0.2s ease;
+  }
+
+  .floating-input input:focus {
+    border-color: var(--primary-material);
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
+  }
+
+  .bottom-nav-item {
+    transition: all 0.2s ease;
+    color: var(--on-surface-variant);
+  }
+
+  .bottom-nav-item.active {
+    color: var(--primary-material);
+  }
+
+  .bottom-nav-item:hover {
+    color: var(--primary-material);
+  }
+}
+
+@layer utilities {
+  .text-primary-material {
+    color: var(--primary-material);
+  }
+
+  .text-primary-dark {
+    color: var(--primary-dark);
+  }
+
+  .text-on-surface {
+    color: var(--on-surface);
+  }
+
+  .text-on-surface-variant {
+    color: var(--on-surface-variant);
+  }
+
+  .text-error {
+    color: var(--error);
+  }
+
+  .text-success {
+    color: var(--success);
+  }
+
+  .bg-primary-material {
+    background-color: var(--primary-material);
+  }
+
+  .bg-primary-dark {
+    background-color: var(--primary-dark);
+  }
+
+  .bg-surface {
+    background-color: var(--surface);
+  }
+
+  .bg-background-material {
+    background-color: var(--background-material);
+  }
+
+  .bg-error {
+    background-color: var(--error);
+  }
+
+  .bg-success {
+    background-color: var(--success);
+  }
+
+  .border-primary-material {
+    border-color: var(--primary-material);
+  }
+
+  .h-screen-mobile {
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .min-h-screen-mobile {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .pb-safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .pb-nav {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+  }
+}
