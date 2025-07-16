@@ -4,7 +4,8 @@ import { Bell, User, Settings, HelpCircle, Info, Check, Shield } from "lucide-re
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BottomNavigation } from "@/components/bottom-navigation";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
+import { signOutUser } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 
@@ -17,8 +18,21 @@ export default function Home() {
     retry: false,
   });
 
-  const handleLogout = () => {
-    window.location.href = "/api/logout";
+  const handleLogout = async () => {
+    try {
+      await signOutUser();
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleNotifications = () => {
@@ -75,7 +89,7 @@ export default function Home() {
           <CardContent className="p-6">
             <h2 className="text-lg font-medium text-on-surface mb-2">Welcome back!</h2>
             <p className="text-on-surface-variant mb-4">
-              {user?.email && `Hello, ${user.email}`}
+              {user?.displayName ? `Hello, ${user.displayName}!` : user?.email && `Hello, ${user.email}`}
             </p>
             <p className="text-on-surface-variant mb-4">
               {pingData?.message === "pong" ? "API connection successful" : "Connecting to API..."}

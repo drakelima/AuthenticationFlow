@@ -7,18 +7,24 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FloatingInput } from "@/components/ui/floating-input";
 import { BottomNavigation } from "@/components/bottom-navigation";
-import { PasswordChangeModal } from "@/components/password-change-modal";
-import { useAuth } from "@/hooks/useAuth";
+
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import { updateProfileSchema, type UpdateProfile } from "@shared/schema";
+import { updateUserDocument, signOutUser } from "@/lib/firebase";
+import { z } from "zod";
+
+const updateProfileSchema = z.object({
+  name: z.string().optional(),
+  phone: z.string().optional(),
+});
+
+type UpdateProfile = z.infer<typeof updateProfileSchema>;
 
 export default function Profile() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
+
 
   const form = useForm<UpdateProfile>({
     resolver: zodResolver(updateProfileSchema),
@@ -40,28 +46,20 @@ export default function Profile() {
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: UpdateProfile) => {
-      const response = await apiRequest("PATCH", "/api/auth/user", data);
-      return response.json();
+      if (!user?.id) throw new Error("User not authenticated");
+      await updateUserDocument(user.id, data);
+      return data;
     },
     onSuccess: () => {
       toast({
         title: "Profile Updated",
         description: "Your profile has been updated successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      // Refresh auth context by forcing re-fetch
+      window.location.reload();
     },
     onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
+      console.error("Profile update error:", error);
       toast({
         title: "Error",
         description: "Failed to update profile. Please try again.",
@@ -70,8 +68,21 @@ export default function Profile() {
     },
   });
 
-  const handleLogout = () => {
-    window.location.href = "/api/logout";
+  const handleLogout = async () => {
+    try {
+      await signOutUser();
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSubmit = (data: UpdateProfile) => {
@@ -124,7 +135,7 @@ export default function Profile() {
               <User className="w-10 h-10 text-white" />
             </div>
             <h2 className="text-xl font-medium text-on-surface">
-              {user?.email || "user@example.com"}
+              {user?.displayName || user?.email || "user@example.com"}
             </h2>
             <p className="text-on-surface-variant mt-1">
               Member since {new Date(user?.createdAt || new Date()).getFullYear()}
@@ -176,18 +187,27 @@ export default function Profile() {
             <h3 className="text-lg font-medium text-on-surface mb-4">Security</h3>
             
             <div className="space-y-3">
-              <button
-                onClick={() => setShowPasswordModal(true)}
+              <button 
+                onClick={() => toast({
+                  title: "Password Management",
+                  description: "Password changes are managed through your Google account.",
+                })}
                 className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <div className="flex items-center space-x-3">
                   <Lock className="w-5 h-5 text-primary-material" />
-                  <span className="text-on-surface">Change Password</span>
+                  <span className="text-on-surface">Password Management</span>
                 </div>
                 <span className="text-on-surface-variant">›</span>
               </button>
               
-              <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+              <button 
+                onClick={() => toast({
+                  title: "Two-Factor Authentication",
+                  description: "2FA is managed through your Google account security settings.",
+                })}
+                className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+              >
                 <div className="flex items-center space-x-3">
                   <Shield className="w-5 h-5 text-primary-material" />
                   <span className="text-on-surface">Two-Factor Authentication</span>
@@ -225,10 +245,6 @@ export default function Profile() {
       </div>
 
       <BottomNavigation onLogout={handleLogout} />
-      <PasswordChangeModal
-        isOpen={showPasswordModal}
-        onClose={() => setShowPasswordModal(false)}
-      />
     </div>
   );
 }
