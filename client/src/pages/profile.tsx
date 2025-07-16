@@ -10,7 +10,7 @@ import { BottomNavigation } from "@/components/bottom-navigation";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { updateUserDocument, signOutUser } from "@/lib/firebase";
+import { updateUserDocument, signOutUser, getFirebaseErrorMessage } from "@/lib/firebase";
 import { z } from "zod";
 
 const updateProfileSchema = z.object({
@@ -52,17 +52,18 @@ export default function Profile() {
     },
     onSuccess: () => {
       toast({
-        title: "Profile Updated",
-        description: "Your profile has been updated successfully.",
+        title: "Perfil Atualizado",
+        description: "Seu perfil foi atualizado com sucesso.",
       });
       // Refresh auth context by forcing re-fetch
       window.location.reload();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Profile update error:", error);
+      const errorMessage = getFirebaseErrorMessage(error);
       toast({
-        title: "Error",
-        description: "Failed to update profile. Please try again.",
+        title: "Erro ao Atualizar",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -72,14 +73,15 @@ export default function Profile() {
     try {
       await signOutUser();
       toast({
-        title: "Logged out",
-        description: "You have been successfully logged out.",
+        title: "Logout Realizado",
+        description: "Você foi desconectado com sucesso.",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Logout error:", error);
+      const errorMessage = getFirebaseErrorMessage(error);
       toast({
-        title: "Error",
-        description: "Failed to log out. Please try again.",
+        title: "Erro no Logout",
+        description: errorMessage,
         variant: "destructive",
       });
     }

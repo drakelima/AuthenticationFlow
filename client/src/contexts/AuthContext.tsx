@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { onAuthStateChangedListener, createUserDocumentFromAuth, getUserDocument } from '@/lib/firebase';
+import { onAuthStateChangedListener, createUserDocumentFromAuth, getUserDocument, getFirebaseErrorMessage } from '@/lib/firebase';
+import { useToast } from '@/hooks/use-toast';
 
 interface User {
   id: string;
@@ -38,35 +39,48 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChangedListener(async (userAuth) => {
-      if (userAuth) {
-        // Create user document if it doesn't exist
-        await createUserDocumentFromAuth(userAuth);
-        
-        // Get user document from Firestore
-        const userDoc = await getUserDocument(userAuth.uid);
-        
-        if (userDoc) {
-          setUser({
-            id: userDoc.id,
-            email: userDoc.email,
-            displayName: userDoc.displayName,
-            name: userDoc.name,
-            phone: userDoc.phone,
-            createdAt: userDoc.createdAt,
-            updatedAt: userDoc.updatedAt,
-          });
+      try {
+        if (userAuth) {
+          // Create user document if it doesn't exist
+          await createUserDocumentFromAuth(userAuth);
+          
+          // Get user document from Firestore
+          const userDoc = await getUserDocument(userAuth.uid);
+          
+          if (userDoc) {
+            setUser({
+              id: userDoc.id,
+              email: userDoc.email,
+              displayName: userDoc.displayName,
+              name: userDoc.name,
+              phone: userDoc.phone,
+              createdAt: userDoc.createdAt,
+              updatedAt: userDoc.updatedAt,
+            });
+          }
+        } else {
+          setUser(null);
         }
-      } else {
+      } catch (error: any) {
+        console.error("Auth state change error:", error);
+        const errorMessage = getFirebaseErrorMessage(error);
+        toast({
+          title: "Erro de Autenticação",
+          description: errorMessage,
+          variant: "destructive",
+        });
         setUser(null);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     });
 
     return unsubscribe;
-  }, []);
+  }, [toast]);
 
   const value = {
     user,

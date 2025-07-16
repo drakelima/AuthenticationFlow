@@ -3,7 +3,7 @@ import { Shield, Eye, EyeOff } from "lucide-react";
 import { FloatingInput } from "@/components/ui/floating-input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { signInWithGoogle } from "@/lib/firebase";
+import { signInWithGoogle, getFirebaseErrorMessage } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Landing() {
@@ -21,11 +21,12 @@ export default function Landing() {
         title: "Sucesso",
         description: "Login com Google realizado com sucesso!",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Google sign-in error:", error);
+      const errorMessage = getFirebaseErrorMessage(error);
       toast({
-        title: "Erro",
-        description: "Falha no login com Google. Tente novamente.",
+        title: "Erro no Login",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

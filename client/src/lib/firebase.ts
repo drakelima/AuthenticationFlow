@@ -28,11 +28,11 @@ export const onAuthStateChangedListener = (callback: (user: any) => void) => {
   return onAuthStateChanged(auth, callback);
 };
 
-// Firestore user operations
+// Firestore user operations - using 'usuarios' collection to match Firestore rules
 export const createUserDocumentFromAuth = async (userAuth: any, additionalInformation = {}) => {
   if (!userAuth) return;
 
-  const userDocRef = doc(db, 'users', userAuth.uid);
+  const userDocRef = doc(db, 'usuarios', userAuth.uid);
   const userSnapshot = await getDoc(userDocRef);
 
   if (!userSnapshot.exists()) {
@@ -48,6 +48,7 @@ export const createUserDocumentFromAuth = async (userAuth: any, additionalInform
       });
     } catch (error) {
       console.log('Error creating user document:', error);
+      throw error;
     }
   }
 
@@ -55,7 +56,7 @@ export const createUserDocumentFromAuth = async (userAuth: any, additionalInform
 };
 
 export const updateUserDocument = async (uid: string, data: any) => {
-  const userDocRef = doc(db, 'users', uid);
+  const userDocRef = doc(db, 'usuarios', uid);
   try {
     await updateDoc(userDocRef, {
       ...data,
@@ -68,7 +69,7 @@ export const updateUserDocument = async (uid: string, data: any) => {
 };
 
 export const getUserDocument = async (uid: string) => {
-  const userDocRef = doc(db, 'users', uid);
+  const userDocRef = doc(db, 'usuarios', uid);
   const userSnapshot = await getDoc(userDocRef);
   
   if (userSnapshot.exists()) {
@@ -76,4 +77,40 @@ export const getUserDocument = async (uid: string) => {
   }
   
   return null;
+};
+
+// Function to get user-friendly error messages in Portuguese
+export const getFirebaseErrorMessage = (error: any): string => {
+  const errorCode = error.code;
+  
+  switch (errorCode) {
+    case 'auth/unauthorized-domain':
+      return 'Domínio não autorizado. Verifique a configuração do Firebase.';
+    case 'auth/popup-blocked':
+      return 'Pop-up bloqueado. Permita pop-ups para este site.';
+    case 'auth/popup-closed-by-user':
+      return 'Login cancelado. Tente novamente.';
+    case 'auth/network-request-failed':
+      return 'Erro de conexão. Verifique sua internet.';
+    case 'auth/too-many-requests':
+      return 'Muitas tentativas. Tente novamente mais tarde.';
+    case 'auth/user-disabled':
+      return 'Conta desativada. Entre em contato com o suporte.';
+    case 'auth/invalid-email':
+      return 'E-mail inválido. Verifique o formato.';
+    case 'auth/user-not-found':
+      return 'Usuário não encontrado. Verifique seus dados.';
+    case 'auth/wrong-password':
+      return 'Senha incorreta. Tente novamente.';
+    case 'auth/email-already-in-use':
+      return 'E-mail já está em uso. Tente fazer login.';
+    case 'auth/weak-password':
+      return 'Senha muito fraca. Use pelo menos 6 caracteres.';
+    case 'permission-denied':
+      return 'Sem permissão para acessar os dados.';
+    case 'unavailable':
+      return 'Serviço temporariamente indisponível. Tente novamente.';
+    default:
+      return 'Erro inesperado. Tente novamente ou entre em contato com o suporte.';
+  }
 };
