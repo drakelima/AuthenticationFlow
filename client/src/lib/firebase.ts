@@ -44,6 +44,12 @@ export const registerWithEmail = async (email: string, password: string, name?: 
     });
   }
   
+  // Create user document in Firestore with the name
+  if (userCredential.user) {
+    const additionalData = name ? { name, displayName: name } : {};
+    await createUserDocumentFromAuth(userCredential.user, additionalData);
+  }
+  
   return userCredential;
 };
 
@@ -71,6 +77,7 @@ export const createUserDocumentFromAuth = async (userAuth: any, additionalInform
         displayName,
         email,
         createdAt,
+        name: (additionalInformation as any).name || displayName, // Use the name from additionalInformation or fallback to displayName
         ...additionalInformation,
       });
     } catch (error) {

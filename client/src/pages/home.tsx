@@ -89,7 +89,7 @@ export default function Home() {
           <CardContent className="p-6">
             <h2 className="text-lg font-medium text-on-surface mb-2">Welcome back!</h2>
             <p className="text-on-surface-variant mb-4">
-              {user?.displayName ? `Hello, ${user.displayName}!` : user?.email && `Hello, ${user.email}`}
+              {user?.name ? `Olá, ${user.name}!` : user?.displayName ? `Olá, ${user.displayName}!` : user?.email && `Olá, ${user.email}!`}
             </p>
             <p className="text-on-surface-variant mb-4">
               {pingData?.message === "pong" ? "API connection successful" : "Connecting to API..."}
