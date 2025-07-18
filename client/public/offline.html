@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - Minha Aplicação</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f3f4f6;
+            color: #374151;
+            text-align: center;
+            padding: 20px;
+        }
+        .offline-icon {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #1f2937;
+        }
+        p {
+            font-size: 16px;
+            margin-bottom: 20px;
+            max-width: 400px;
+        }
+        .retry-btn {
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .retry-btn:hover {
+            background-color: #4338ca;
+        }
+    </style>
+</head>
+<body>
+    <svg class="offline-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.18l.09 2.016m-.09 15.608l.09 2.016M21.82 12l-2.016.09M4.18 12l2.016.09"></path>
+    </svg>
+    
+    <h1>Você está offline</h1>
+    <p>Verifique sua conexão com a internet e tente novamente.</p>
+    
+    <button class="retry-btn" onclick="window.location.reload()">
+        Tentar novamente
+    </button>
+
+    <script>
+        // Check if we're back online and auto-refresh
+        window.addEventListener('online', () => {
+            window.location.reload();
+        });
+    </script>
+</body>
+</html>

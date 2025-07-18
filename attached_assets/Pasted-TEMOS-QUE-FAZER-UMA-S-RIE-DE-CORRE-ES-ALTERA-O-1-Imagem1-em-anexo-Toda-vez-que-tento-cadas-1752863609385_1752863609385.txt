@@ -1,0 +1,62 @@
+TEMOS QUE FAZER UMA SÉRIE DE CORREÇÕES
+
+ALTERAÇÃO 1:
+Imagem1 (em anexo): Toda vez que tento cadastrar ou logar, ele mostra essa
+imagem, quando clico em "allow", ele volta para a tela de login e nada acontece, corrija isso para que eu tenha tudo isso funcional
+
+ALTERAÇÃO 2:
+front-end:
+- Ao clicar na aba de "cadastrar" é exibido o email, senha e confirmar senha, porém
+o nome do botão está como "entrar" e deveria ser "registrar"
+
+ALTERAÇÃO 3:
+Transformar a aplicação em PWA:
+
+Transforme uma aplicação web existente em uma aplicação PWA (Progressive Web App), **sem alterar nenhuma lógica ou estrutura atual do projeto** — apenas adicionando os arquivos e configurações necessários.
+
+🛠️ **Requisitos da Transformação:**
+
+1. **Gerar os arquivos essenciais do PWA:**
+   - `manifest.json`
+   - `service-worker.js`
+   - Registro do service worker no `main.ts` ou `index.ts`
+
+2. **Configurar o `manifest.json` com ícone, nome, orientação e modo standalone:**
+   - Nome: "Minha Aplicação"
+   - Cor de fundo: `#ffffff`
+   - Tema: `#4f46e5`
+   - Ícones com tamanhos 192x192 e 512x512
+   - Orientation: `portrait`
+   - Display: `standalone`
+
+3. **Configurar `service-worker.js` com as seguintes estratégias de cache:**
+
+   **🔁 Sempre buscar da rede primeiro (com fallback para cache):**
+   - HTML (`*.html`)
+   - JavaScript (`*.js`)
+   - CSS (`*.css`)
+   - JSON (`*.json`)
+   - Estratégia: `network-first`
+
+   **🖼️ Imagens (`*.png`, `*.jpg`, `*.jpeg`, `*.webp`, `*.svg`):**
+   - Estratégia: `cache-first`
+   - Tempo de expiração: **30 dias**
+
+   **🔤 Fontes (`*.woff2`, `*.woff`, `*.ttf`, `*.otf`):**
+   - Estratégia: `cache-first`
+   - Tempo de expiração: **6 meses**
+
+   Use a biblioteca `workbox` se desejar, mas pode ser vanilla JavaScript.
+
+4. **No registro do service worker, adicionar lógica para `update on reload`:**
+   - Se detectar uma nova versão instalada, aplicar `skipWaiting()` automaticamente
+   - Opcional: Mostrar um `confirm()` com "Nova versão disponível. Deseja atualizar?"
+
+📦 **Importante:** Toda essa transformação deve acontecer **sem modificar a lógica da aplicação existente**. Apenas adicionar os arquivos e registro PWA necessários.
+
+🎯 Objetivo:
+- Ter uma aplicação offline-ready.
+- Garantir que o código-fonte (HTML, JS, CSS, JSON) **sempre pegue da rede primeiro** para evitar usar código desatualizado.
+- Otimizar performance para imagens e fontes com cache persistente.
+
+Exporte todos os arquivos novos ou alterados, prontos para integrar na aplicação.

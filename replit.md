@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a full-stack web application built with a React frontend and Express.js backend. The application uses TypeScript throughout and implements Firebase Authentication with Google sign-in. The project features a mobile-first design using Tailwind CSS and shadcn/ui components, with Firestore as the database for user data storage. The application supports both traditional email/password authentication (placeholder) and Google OAuth authentication.
+This is a full-stack Progressive Web Application (PWA) built with a React frontend and Express.js backend. The application uses TypeScript throughout and implements Firebase Authentication with Google sign-in. The project features a mobile-first design using Tailwind CSS and shadcn/ui components, with Firestore as the database for user data storage. The application supports Google OAuth authentication and includes offline capabilities through service workers.
 
 ## User Preferences
 
@@ -38,6 +38,7 @@ Preferred communication style: Simple, everyday language.
 - **Strategy**: Firebase signInWithPopup for Google authentication
 - **State Management**: React Context for authentication state
 - **Database**: Firestore for user data storage with real-time updates
+- **Offline Support**: PWA with service worker caching
 
 ### Database Schema
 - **Users Collection**: Stores user profile information in Firestore
