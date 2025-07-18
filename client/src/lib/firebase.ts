@@ -53,12 +53,32 @@ export const registerWithEmail = async (email: string, password: string, name?: 
   return userCredential;
 };
 
-export const signOutUser = () => {
-  return signOut(auth);
+export const signOutUser = async () => {
+  try {
+    await signOut(auth);
+    // Clear any cached auth data
+    localStorage.clear();
+    sessionStorage.clear();
+    // Force page reload to ensure clean state
+    window.location.reload();
+  } catch (error) {
+    console.error('Error signing out:', error);
+    throw error;
+  }
 };
 
 export const onAuthStateChangedListener = (callback: (user: any) => void) => {
   return onAuthStateChanged(auth, callback);
+};
+
+// Function to clear all authentication cache
+export const clearAuthCache = () => {
+  localStorage.clear();
+  sessionStorage.clear();
+  // Clear any Firebase persistence
+  if ('indexedDB' in window) {
+    indexedDB.deleteDatabase('firebaseLocalStorageDb');
+  }
 };
 
 // Firestore user operations - using 'usuarios' collection to match Firestore rules
@@ -152,11 +172,17 @@ export const getFirebaseErrorMessage = (error: any): string => {
       return 'Senha é obrigatória.';
     case 'auth/missing-email':
       return 'Email é obrigatório.';
+    case 'auth/user-deleted':
+    case 'auth/account-exists-with-different-credential':
+      return 'Esta conta foi removida ou tem conflito. Limpe o cache e tente novamente.';
+    case 'auth/requires-recent-login':
+      return 'Por favor, faça login novamente para continuar.';
     case 'permission-denied':
       return 'Sem permissão para acessar os dados.';
     case 'unavailable':
       return 'Serviço temporariamente indisponível. Tente novamente.';
     default:
+      console.log('Unhandled error code:', errorCode);
       return 'Erro inesperado. Tente novamente ou entre em contato com o suporte.';
   }
 };

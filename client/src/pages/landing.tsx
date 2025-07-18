@@ -3,7 +3,7 @@ import { Shield, Eye, EyeOff } from "lucide-react";
 import { FloatingInput } from "@/components/ui/floating-input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { signInWithGoogle, signInWithEmail, registerWithEmail, getFirebaseErrorMessage } from "@/lib/firebase";
+import { signInWithGoogle, signInWithEmail, registerWithEmail, getFirebaseErrorMessage, clearAuthCache } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Landing() {
@@ -105,6 +105,18 @@ export default function Landing() {
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleClearCache = () => {
+    clearAuthCache();
+    toast({
+      title: "Cache Limpo",
+      description: "Cache de autenticação foi limpo. Tente fazer login novamente.",
+    });
+    // Reload page to ensure clean state
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
   };
 
   return (
@@ -305,6 +317,17 @@ export default function Landing() {
                 </>
               )}
             </Button>
+
+            {/* Troubleshooting section */}
+            <div className="text-center mt-3">
+              <button
+                type="button"
+                onClick={handleClearCache}
+                className="text-xs text-gray-400 hover:text-gray-600 underline transition-colors"
+              >
+                Problemas para entrar? Limpar cache
+              </button>
+            </div>
           </div>
         </CardContent>
       </Card>
