@@ -1,5 +1,14 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut, 
+  onAuthStateChanged,
+  updateProfile
+} from "firebase/auth";
 import { getFirestore, doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -16,8 +25,26 @@ export const db = getFirestore(app);
 
 const provider = new GoogleAuthProvider();
 
+// Authentication functions
 export const signInWithGoogle = () => {
   return signInWithPopup(auth, provider);
+};
+
+export const signInWithEmail = async (email: string, password: string) => {
+  return signInWithEmailAndPassword(auth, email, password);
+};
+
+export const registerWithEmail = async (email: string, password: string, name?: string) => {
+  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  
+  // Update the display name if provided
+  if (name && userCredential.user) {
+    await updateProfile(userCredential.user, {
+      displayName: name
+    });
+  }
+  
+  return userCredential;
 };
 
 export const signOutUser = () => {
@@ -106,6 +133,18 @@ export const getFirebaseErrorMessage = (error: any): string => {
       return 'E-mail já está em uso. Tente fazer login.';
     case 'auth/weak-password':
       return 'Senha muito fraca. Use pelo menos 6 caracteres.';
+    case 'auth/operation-not-allowed':
+      return 'Login com email/senha não está habilitado. Entre em contato com o suporte.';
+    case 'auth/email-already-exists':
+      return 'Este email já está cadastrado. Tente fazer login.';
+    case 'auth/invalid-credential':
+      return 'Email ou senha incorretos. Verifique seus dados.';
+    case 'auth/user-token-expired':
+      return 'Sessão expirada. Faça login novamente.';
+    case 'auth/missing-password':
+      return 'Senha é obrigatória.';
+    case 'auth/missing-email':
+      return 'Email é obrigatório.';
     case 'permission-denied':
       return 'Sem permissão para acessar os dados.';
     case 'unavailable':

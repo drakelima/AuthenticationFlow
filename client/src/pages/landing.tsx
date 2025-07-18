@@ -3,7 +3,7 @@ import { Shield, Eye, EyeOff } from "lucide-react";
 import { FloatingInput } from "@/components/ui/floating-input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { signInWithGoogle, getFirebaseErrorMessage } from "@/lib/firebase";
+import { signInWithGoogle, signInWithEmail, registerWithEmail, getFirebaseErrorMessage } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Landing() {
@@ -11,6 +11,12 @@ export default function Landing() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    name: ''
+  });
   const { toast } = useToast();
 
   const handleGoogleSignIn = async () => {
@@ -34,14 +40,71 @@ export default function Landing() {
     }
   };
 
-  const handleLogin = () => {
-    // For now, redirect to Google sign-in since we're using Firebase Auth
-    handleGoogleSignIn();
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Basic validation
+    if (!formData.email || !formData.password) {
+      toast({
+        title: "Erro",
+        description: "Email e senha são obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!isLogin && formData.password !== formData.confirmPassword) {
+      toast({
+        title: "Erro",
+        description: "As senhas não coincidem.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!isLogin && formData.password.length < 6) {
+      toast({
+        title: "Erro",
+        description: "A senha deve ter pelo menos 6 caracteres.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      if (isLogin) {
+        await signInWithEmail(formData.email, formData.password);
+        toast({
+          title: "Sucesso",
+          description: "Login realizado com sucesso!",
+        });
+      } else {
+        await registerWithEmail(formData.email, formData.password, formData.name);
+        toast({
+          title: "Sucesso",
+          description: "Conta criada com sucesso!",
+        });
+      }
+    } catch (error: any) {
+      console.error("Auth error:", error);
+      const errorMessage = getFirebaseErrorMessage(error);
+      toast({
+        title: isLogin ? "Erro no Login" : "Erro no Cadastro",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleRegister = () => {
-    // For now, redirect to Google sign-in since we're using Firebase Auth
-    handleGoogleSignIn();
+  const handleInputChange = (field: keyof typeof formData, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   return (
@@ -62,7 +125,10 @@ export default function Landing() {
       {/* Tab Navigation */}
       <div className="flex mb-6 bg-gray-100 rounded-lg p-1 max-w-md mx-auto w-full">
         <button
-          onClick={() => setIsLogin(true)}
+          onClick={() => {
+            setIsLogin(true);
+            setFormData({ email: '', password: '', confirmPassword: '', name: '' });
+          }}
           className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
             isLogin 
               ? 'bg-white text-blue-500 shadow-sm' 
@@ -72,7 +138,10 @@ export default function Landing() {
           Entrar
         </button>
         <button
-          onClick={() => setIsLogin(false)}
+          onClick={() => {
+            setIsLogin(false);
+            setFormData({ email: '', password: '', confirmPassword: '', name: '' });
+          }}
           className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
             !isLogin 
               ? 'bg-white text-blue-500 shadow-sm' 
@@ -87,7 +156,22 @@ export default function Landing() {
       <Card className="material-shadow mb-6 max-w-md mx-auto w-full">
         <CardContent className="p-6">
           
-          <form className="space-y-5">
+          <form className="space-y-5" onSubmit={handleFormSubmit}>
+            {!isLogin && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nome (opcional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Seu nome"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            )}
+            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 E-mail
@@ -95,6 +179,8 @@ export default function Landing() {
               <input
                 type="email"
                 placeholder="seu@email.com"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
@@ -107,8 +193,11 @@ export default function Landing() {
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="........"
+                value={formData.password}
+                onChange={(e) => handleInputChange('password', e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
                 required
+                minLength={6}
               />
               <button
                 type="button"
@@ -127,8 +216,11 @@ export default function Landing() {
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="........"
+                  value={formData.confirmPassword}
+                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
                   required
+                  minLength={6}
                 />
                 <button
                   type="button"
@@ -153,14 +245,20 @@ export default function Landing() {
             )}
             
             <Button
-              type="button"
-              onClick={isLogin ? handleLogin : handleRegister}
-              className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors flex items-center justify-center space-x-2"
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white font-medium rounded-lg transition-colors flex items-center justify-center space-x-2"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-              </svg>
-              <span>{isLogin ? "Entrar" : "Registrar"}</span>
+              {isLoading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                  </svg>
+                  <span>{isLogin ? "Entrar" : "Registrar"}</span>
+                </>
+              )}
             </Button>
           </form>
           
